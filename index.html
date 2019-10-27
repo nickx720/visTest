@@ -53,13 +53,12 @@
                 <div class="column">
                     <textarea rows='1' placeholder='Enter your JSON here'></textarea>
                     <div class="section buttons">
-                        <button class="button is-primary">Submit</button>
+                        <button class="button is-primary" onclick="retreiveJson()">Submit</button>
                        <!--  <button class="button is-danger">Link</button> -->
                     </div>
                 </div>
                 <div class="column">
                     <div id="mynetwork"></div>
-                    Second column
                 </div>
             </div>
     </section>
@@ -84,6 +83,8 @@
 <script src="https://visjs.github.io/vis-network/dist/vis-network.min.js" type="application/javascript"></script>
 <script>
     const textarea = document.querySelector('textarea');
+    let nodes;
+    let connections;
 
     textarea.addEventListener('keydown', autosize);
 
@@ -94,9 +95,30 @@
             el.style.cssText = 'height:' + el.scrollHeight + 'px';
         }, 0);
     }
-    function draw() {
+    function retreiveJson() {
+        let jsonValue = JSON.parse(textarea.value);
+        console.log(jsonValue.canonicalGraph);
+        nodes = [];
+        connections = [];
+        jsonValue.canonicalGraph.nodes.forEach((element, index) => {
+            nodes.push({
+                id: index,
+                label:element.properties.fullName[0]
+            })
+        });
+        jsonValue.canonicalGraph.connections.forEach((element, index) => {
+            connections.push({
+                from: element.sourceIdx,
+                to:element.targetIdx
+            })
+        });
+        console.log(nodes);
+        console.log(connections);
+        draw(nodes, connections);
+    }
+    function draw(nodes, edges) {
         // create some nodes
-        var nodes = [
+        var nodesDefault = [
             { id: 0, label: "Myriel", group: 1 },
             { id: 1, label: "Napoleon", group: 1 },
             { id: 2, label: "Mlle.Baptistine", group: 1 },
@@ -177,7 +199,7 @@
         ];
 
         // create some edges
-        var edges = [
+        var edgesDefault = [
             { from: 1, to: 0 },
             { from: 2, to: 0 },
             { from: 3, to: 0 },
@@ -437,9 +459,10 @@
         // create a network
         var container = document.getElementById("mynetwork");
         var data = {
-            nodes: nodes,
-            edges: edges
+            nodes: nodes || nodesDefault,
+            edges: edges || edgesDefault
         };
+        console.log(data);
         var options = {
             nodes: {
                 shape: "dot",
